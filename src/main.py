@@ -1,9 +1,16 @@
 """TaskTracker - gerenciador de tarefas em linha de comando (Bootcamp II, Fase 2)."""
 
+import re
+from datetime import datetime
+
 STATUS_PENDENTE = "Pendente"
+STATUS_CONCLUIDA = "Concluída"
+SEPARADOR = "-" * 44
 
 # Aceita Alta, Média (com ou sem acento) e Baixa, sem diferenciar maiúsculas.
 PRIORIDADES = {"alta": "Alta", "média": "Média", "media": "Média", "baixa": "Baixa"}
+ORDEM_PRIORIDADE = {"Alta": 0, "Média": 1, "Baixa": 2}
+PADRAO_DATA = re.compile(r"^\d{2}/\d{2}/\d{4}$")
 
 
 def titulo_valido(texto):
@@ -16,6 +23,21 @@ def normalizar_prioridade(texto):
     return PRIORIDADES.get(texto.strip().lower())
 
 
+def validar_data_limite(texto):
+    """Data limite é opcional e aceita formato livre ou DD/MM/AAAA.
+
+    Retorna (ok, valor). Se o texto estiver no formato DD/MM/AAAA, a data precisa
+    existir de verdade (31/02/2026 é rejeitada). Outro texto é aceito como livre.
+    """
+    valor = texto.strip()
+    if PADRAO_DATA.match(valor):
+        try:
+            datetime.strptime(valor, "%d/%m/%Y")
+        except ValueError:
+            return False, valor
+    return True, valor
+
+
 def cadastrar_tarefa(tarefas):
     """Lê os dados de uma tarefa e a grava na lista."""
     print("\n=== Cadastrar nova tarefa ===")
@@ -25,7 +47,7 @@ def cadastrar_tarefa(tarefas):
             break
         print("Erro: o título é obrigatório e não pode ficar em branco. Tente novamente.")
 
-    descricao = input("Descrição da tarefa: ")
+    descricao = input("Descrição da tarefa (opcional): ")
 
     while True:
         prioridade = normalizar_prioridade(input("Prioridade (Alta, Média ou Baixa): "))
@@ -33,7 +55,14 @@ def cadastrar_tarefa(tarefas):
             break
         print("Erro: prioridade inválida. Digite exatamente Alta, Média ou Baixa.")
 
-    data_limite = input("Data limite (opcional): ")
+    while True:
+        ok, data_limite = validar_data_limite(
+            input("Data limite (opcional, ex.: 15/10/2026): ")
+        )
+        if ok:
+            break
+        print("Erro: data inexistente. Use DD/MM/AAAA com uma data real ou deixe livre.")
+
     tarefas.append({
         "titulo": titulo.strip(),
         "descricao": descricao.strip(),
@@ -44,14 +73,35 @@ def cadastrar_tarefa(tarefas):
     print("Tarefa cadastrada com sucesso!")
 
 
+def exibir_tarefa(numero, tarefa):
+    """Mostra todas as propriedades de uma tarefa de forma legível."""
+    print(SEPARADOR)
+    print(f"Tarefa nº {numero}")
+    print(f"  Título     : {tarefa['titulo']}")
+    print(f"  Descrição  : {tarefa['descricao'] or '(sem descrição)'}")
+    print(f"  Prioridade : {tarefa['prioridade']}")
+    print(f"  Data limite: {tarefa['data_limite'] or '(não definida)'}")
+    print(f"  Status     : {tarefa['status']}")
+
+
 def listar_tarefas(tarefas):
-    """Exibe todas as tarefas cadastradas."""
+    """Lista as tarefas por prioridade (Alta, Média, Baixa) e mostra o resumo."""
     print("\n=== Tarefas cadastradas ===")
     if not tarefas:
         print("Não há tarefas cadastradas no momento.")
         return
-    for numero, tarefa in enumerate(tarefas, start=1):
-        print(f"Tarefa {numero}: {tarefa['titulo']} | {tarefa['prioridade']} | {tarefa['status']}")
+
+    # O número é a posição de cadastro; a ordenação é estável, então tarefas
+    # de mesma prioridade mantêm a ordem em que foram cadastradas.
+    numeradas = list(enumerate(tarefas, start=1))
+    numeradas.sort(key=lambda par: ORDEM_PRIORIDADE[par[1]["prioridade"]])
+    for numero, tarefa in numeradas:
+        exibir_tarefa(numero, tarefa)
+    print(SEPARADOR)
+
+    pendentes = sum(1 for t in tarefas if t["status"] == STATUS_PENDENTE)
+    concluidas = sum(1 for t in tarefas if t["status"] == STATUS_CONCLUIDA)
+    print(f"Pendentes: {pendentes} | Concluídas: {concluidas} | Total: {len(tarefas)}")
 
 
 def exibir_menu():
@@ -62,7 +112,7 @@ def exibir_menu():
 
 
 def main():
-    tarefas = []
+    tarefas = []  # lista que guarda as tarefas (dicionários) em memória
     while True:
         exibir_menu()
         opcao = input("Escolha uma opção: ").strip()
@@ -78,4 +128,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (KeyboardInterrupt, EOFError):
+        print("\nEntrada interrompida. Encerrando a aplicação. Até logo!")
