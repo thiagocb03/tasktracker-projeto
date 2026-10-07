@@ -1,19 +1,45 @@
 """TaskTracker - gerenciador de tarefas em linha de comando (Bootcamp II, Fase 2)."""
 
+STATUS_PENDENTE = "Pendente"
+
+# Aceita Alta, Média (com ou sem acento) e Baixa, sem diferenciar maiúsculas.
+PRIORIDADES = {"alta": "Alta", "média": "Média", "media": "Média", "baixa": "Baixa"}
+
+
+def titulo_valido(texto):
+    """O título é obrigatório: vazio ou só espaços em branco é rejeitado."""
+    return bool(texto and texto.strip())
+
+
+def normalizar_prioridade(texto):
+    """Devolve 'Alta', 'Média' ou 'Baixa'; devolve None se a entrada for inválida."""
+    return PRIORIDADES.get(texto.strip().lower())
+
 
 def cadastrar_tarefa(tarefas):
     """Lê os dados de uma tarefa e a grava na lista."""
     print("\n=== Cadastrar nova tarefa ===")
-    titulo = input("Título da tarefa: ")
+    while True:
+        titulo = input("Título da tarefa (obrigatório): ")
+        if titulo_valido(titulo):
+            break
+        print("Erro: o título é obrigatório e não pode ficar em branco. Tente novamente.")
+
     descricao = input("Descrição da tarefa: ")
-    prioridade = input("Prioridade (Alta, Média ou Baixa): ")
+
+    while True:
+        prioridade = normalizar_prioridade(input("Prioridade (Alta, Média ou Baixa): "))
+        if prioridade:
+            break
+        print("Erro: prioridade inválida. Digite exatamente Alta, Média ou Baixa.")
+
     data_limite = input("Data limite (opcional): ")
     tarefas.append({
-        "titulo": titulo,
-        "descricao": descricao,
+        "titulo": titulo.strip(),
+        "descricao": descricao.strip(),
         "prioridade": prioridade,
         "data_limite": data_limite,
-        "status": "Pendente",
+        "status": STATUS_PENDENTE,
     })
     print("Tarefa cadastrada com sucesso!")
 
