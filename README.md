@@ -3,7 +3,7 @@
 Gerenciador de tarefas em linha de comando (CLI), desenvolvido em Python 3 para a
 disciplina **Bootcamp II** (CEUB EAD), Fase 2 (Entrega Intermediária).
 
-**Autor:** Thiago Castro Barreto, Ciências de Dados.
+**Autor:** Thiago Castro Barreto, Ciências de Dados, **RA:** 22301452.
 
 ## Descrição funcional
 O TaskTracker centraliza as tarefas do dia a dia em um único programa de terminal.
