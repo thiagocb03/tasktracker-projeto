@@ -1,8 +1,17 @@
-# Orquestra a execução interativa da CLI (Fase 3).
-# O TaskTracker usa input(), então o container precisa de entrada e terminal abertos.
+# ============================================================================
+# docker-compose.yml do TaskTracker (Fase 3)
+#
+# Se o Dockerfile é a receita da imagem, o Compose é o "maestro": guarda em um
+# arquivo as opções de execução do container, para não precisar digitá-las.
+#
+# Como usar (na pasta onde está este arquivo):
+#   docker compose run --rm tasktracker-app
+# ============================================================================
 services:
-  tasktracker-app:
-    build: .
-    image: tasktracker-app
-    stdin_open: true   # mantém o canal de entrada de dados aberto
-    tty: true          # aloca um terminal virtual, simulando o seu console
+  tasktracker-app:           # nome do serviço, usado no comando acima
+    build: .                 # constrói a imagem usando o Dockerfile desta pasta
+    image: tasktracker-app   # nome da imagem, o mesmo usado no docker build
+    # O TaskTracker usa input() para ler o teclado. Um container isolado não
+    # recebe digitação por padrão, então as duas opções abaixo são necessárias:
+    stdin_open: true         # mantém o canal de entrada de dados (teclado) aberto
+    tty: true                # aloca um terminal virtual, simulando o seu console
