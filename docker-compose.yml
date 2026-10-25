@@ -1,0 +1,8 @@
+# Orquestra a execução interativa da CLI (Fase 3).
+# O TaskTracker usa input(), então o container precisa de entrada e terminal abertos.
+services:
+  tasktracker-app:
+    build: .
+    image: tasktracker-app
+    stdin_open: true   # mantém o canal de entrada de dados aberto
+    tty: true          # aloca um terminal virtual, simulando o seu console

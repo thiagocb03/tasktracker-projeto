@@ -1,0 +1,8 @@
+# Mantém o contexto de build pequeno: o Dockerfile só copia src/.
+.git
+.gitignore
+docs/
+**/__pycache__/
+*.pyc
+.venv/
+venv/
